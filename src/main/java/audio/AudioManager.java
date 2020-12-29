@@ -33,51 +33,42 @@ import java.util.Map;
 
 public class AudioManager {
 
-    public Map<String, Map.Entry<AudioPlayer, TrackManager>> players = new HashMap<>();
-    private final AudioPlayerManager myManager = new DefaultAudioPlayerManager();
 
-    public AudioManager() {
+    private final AudioPlayerManager myManager = new DefaultAudioPlayerManager();
+    private AudioPlayer audioPlayer;
+    private TrackManager trackManager;
+
+    public AudioManager(Guild guild) {
         AudioSourceManagers.registerRemoteSources(myManager);
         myManager.getConfiguration().setFilterHotSwapEnabled(true);
+
+        audioPlayer = myManager.createPlayer();
+        trackManager = new TrackManager(audioPlayer, this);
+        audioPlayer.addListener(trackManager);
+        guild.getAudioManager().setSendingHandler(new AudioPlayerSendHandler(audioPlayer));
     }
 
-    public boolean hasPlayer(Guild guild) {
-        return players.containsKey(guild.getId());
+    public AudioPlayerManager getManager() {
+        return myManager;
     }
 
-    public AudioPlayer getPlayer(Guild guild) {
-        AudioPlayer p;
-        if (hasPlayer(guild)) {
-            p = players.get(guild.getId()).getKey();
-        } else {
-            p = createPlayer(guild);
-        }
-        return p;
+    public AudioPlayer getAudioPlayer() {
+        return audioPlayer;
     }
 
-    public TrackManager getTrackManager(Guild guild) {
-        return players.get(guild.getId()).getValue();
-    }
-
-    public AudioPlayer createPlayer(Guild guild) {
-        AudioPlayer nPlayer = myManager.createPlayer();
-        TrackManager manager = new TrackManager(nPlayer, this);
-        nPlayer.addListener(manager);
-        guild.getAudioManager().setSendingHandler(new AudioPlayerSendHandler(nPlayer));
-        players.put(guild.getId(), new AbstractMap.SimpleEntry<>(nPlayer, manager));
-        return nPlayer;
+    public TrackManager getTrackManager() {
+        return trackManager;
     }
 
     public void loadTrack(MessageReceivedEvent event) {
         Guild guild = event.getGuild();
-        getPlayer(guild);
 
         myManager.loadItemOrdered(guild, "https://www.youtube.com/watch?v=y90yaLFoYoA", new AudioLoadResultHandler() {
 
             @Override
             public void trackLoaded(AudioTrack track) {
-                getTrackManager(guild).queue(track, event.getMember());
-                getPlayer(guild).setVolume(400);
+                trackManager.queue(track, event.getMember());
+                audioPlayer.setVolume(400);
                 event.getTextChannel().sendMessage("Wake up in progress!").queue();
             }
 

@@ -23,17 +23,12 @@ import javax.security.auth.login.LoginException;
 public class Bot {
 
     public static void main(String[] args) {
-        JDABuilder builder = JDABuilder.createDefault(SECRETS.Token);
-        builder.setStatus(OnlineStatus.INVISIBLE);
-
-        AudioManager audioManager = new AudioManager();
-
-        builder.addEventListeners(new WakeUpListener(audioManager));
-
-        try {
-            builder.build();
-        } catch (LoginException e) {
-            e.printStackTrace();
+        for (String token : SECRETS.Tokens) {
+            try {
+                JDABuilder.createDefault(token).setStatus(OnlineStatus.INVISIBLE).addEventListeners(new WakeUpListener()).build();
+            } catch (LoginException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

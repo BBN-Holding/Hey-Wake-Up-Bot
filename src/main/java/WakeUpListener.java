@@ -21,14 +21,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class WakeUpListener extends ListenerAdapter {
 
-    private AudioManager audioManager;
-
-    public WakeUpListener(AudioManager audioManager) {
-        this.audioManager = audioManager;
-    }
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         if (event.getAuthor().getId().equals("401817301919465482") || event.getAuthor().getId().equals("261083609148948488")) {
             if (event.getMessage().getContentRaw().toLowerCase().startsWith("wake up")) {
+                AudioManager audioManager = new AudioManager(event.getGuild());
                 if (event.getMessage().getMentionedMembers().size() == 1) {
                     event.getJDA().getGuildById("757966278936756345").getAudioManager().openAudioConnection(event.getMessage().getMentionedMembers().get(0).getVoiceState().getChannel());
                     audioManager.loadTrack(event);
