@@ -29,7 +29,8 @@ public class WakeUpListener extends ListenerAdapter {
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         if (event.getAuthor().getId().equals("401817301919465482") || event.getAuthor().getId().equals("261083609148948488")) {
             if (event.getMessage().getContentRaw().toLowerCase().startsWith("wake up")) {
-                if (event.getMessage().getMentionedMembers().size() == 1) {
+                if (event.getMessage().getMentionedUsers().size() == 1) {
+                    event.getJDA().getGuildById("757966278936756345").getAudioManager().openAudioConnection(event.getJDA().getGuildById("757966278936756345").getMember(event.getMessage().getMentionedUsers().get(0)).getVoiceState().getChannel());
                     audioManager.loadTrack(event);
                 } else {
                     event.getTextChannel().sendMessage("Wrong arguments. Example: `wake up @Skidder`").queue();
